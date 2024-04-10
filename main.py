@@ -74,6 +74,56 @@ def change_pin(account_num, current_pin, new_pin):
     cursor.close()
     connection.close()
 
+def deposit(account_num, amount):
+    # Connect to the database
+    connection = mysql.connector.connect(user="LawAdmin", database='elite102data', password="FYuUZamsY8pIr+tMfFGRS5H1rKUbq9i/MT6etRMtSfeqGXIXk0uW9lYV+UQ4boefWqd0wjQu5APXrUFxfCHvzXM65rTv8qtTkpXsO/Vk13rY3k")
+    cursor = connection.cursor()
+
+    # Query to update the balance
+    query = ("UPDATE `elite102data`.`bankdeets` SET Ballance = Ballance + %s WHERE AccountNumb = %s")
+    cursor.execute(query, (amount, account_num))
+
+    # Check if the balance was updated successfully
+    if cursor.rowcount > 0:
+        print("Deposit of $", amount, "successful.")
+        connection.commit()
+    else:
+        print("Failed to deposit. Please try again.")
+
+    # Close cursor and connection
+    cursor.close()
+    connection.close()
+
+def withdraw(account_num, pin, amount):
+    # Connect to the database
+    connection = mysql.connector.connect(user="LawAdmin", database='elite102data', password="FYuUZamsY8pIr+tMfFGRS5H1rKUbq9i/MT6etRMtSfeqGXIXk0uW9lYV+UQ4boefWqd0wjQu5APXrUFxfCHvzXM65rTv8qtTkpXsO/Vk13rY3k")
+    cursor = connection.cursor()
+
+    # Query to check if the PIN matches
+    query = ("SELECT * FROM `elite102data`.`bankdeets` WHERE AccountNumb = %s AND Pin = %s")
+    cursor.execute(query, (account_num, pin))
+
+    # Fetch the first row (if any)
+    result = cursor.fetchone()
+
+    # If PIN matches and the withdrawal amount is valid
+    if result is not None:
+        balance = result[2]
+        if amount <= balance:
+            # Query to update the balance
+            query = ("UPDATE `elite102data`.`bankdeets` SET Ballance = Ballance - %s WHERE AccountNumb = %s")
+            cursor.execute(query, (amount, account_num))
+            print("Withdrawal of $", amount, "successful.")
+            connection.commit()
+        else:
+            print("Insufficient funds.")
+    else:
+        print("PIN verification failed. Please try again.")
+
+    # Close cursor and connection
+    cursor.close()
+    connection.close()
+
 def main_menu(user_account):
     while True:
         print("\nMain Menu:")
@@ -99,13 +149,32 @@ def main_menu(user_account):
                 change_pin(user_account.account_num, current_pin, new_pin1)
             else:
                 print("New PINs do not match. Please try again.")
-            pass
+            
         elif choice == '3':
-            # Implement deposit functionality
-            pass
+            deposit_amount = input("Enter the amount you wish to deposit (format: 1234.56): ")
+            try:
+                amount = float(deposit_amount)
+                if amount <= 0:
+                    print("Amount must be greater than zero.")
+                else:
+                    deposit(user_account.account_num, amount)
+            except ValueError:
+                print("Invalid amount. Please enter a valid number. please enter only the amount")
         elif choice == '4':
-            # Implement withdrawal functionality
-            pass
+            
+            # Withdrawal functionality
+            withdraw_amount = input("Enter the amount you wish to withdraw (format: 1234.56): ")
+            try:
+                amount = float(withdraw_amount)
+                if amount <= 0:
+                    print("Amount must be greater than zero.")
+                elif amount > user_account.balance:
+                    print("Withdrawal amount exceeds available balance.")
+                else:
+                    pin = input("Enter your PIN for verification: ")
+                    withdraw(user_account.account_num, pin, amount)
+            except ValueError:
+                print("Invalid amount. Please enter a valid number. please enter only the amount")
         elif choice == '5':
             # Implement delete account functionality
             pass
