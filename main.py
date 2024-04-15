@@ -2,10 +2,12 @@
 import mysql.connector
 
 class Account:
-    def __init__(self, account_num, pin, balance):
+    def __init__(self, account_num,AccountName, balance, pin, AccesLevel):
         self.account_num = account_num
-        self.pin = pin
+        self.AccountName = AccountName
         self.balance = balance
+        self.pin = pin
+        self.AccesLevel = AccesLevel
 
 def LogIn(account_num, pin):
     # Connect to the database
@@ -123,8 +125,43 @@ def withdraw(account_num, pin, amount):
     # Close cursor and connection
     cursor.close()
     connection.close()
+def listAll():
+  # Connect to the database
+    connection = mysql.connector.connect(user="LawAdmin", database='elite102data', password="FYuUZamsY8pIr+tMfFGRS5H1rKUbq9i/MT6etRMtSfeqGXIXk0uW9lYV+UQ4boefWqd0wjQu5APXrUFxfCHvzXM65rTv8qtTkpXsO/Vk13rY3k")
+    cursor = connection.cursor()
 
+    # Query to check if the account exists and the PIN matches
+    query = ("SELECT AccountNumb, AccountName, Ballance FROM `elite102data`.`bankdeets` ")
+    for result in cursor.execute(query, multi=True):
+        print(result.fetchall())
+        # Fetch the first row (if any)
+
+    # Close cursor and connection
+    cursor.close()
+    connection.close()
+
+    
 def main_menu(user_account):
+    if user_account.AccesLevel == 1:
+      while True:
+        print("\nAdmin Menu:")
+        print("1. list all") ##will not include pins
+        print("2. view account")## will access an individual account
+        print("3. place freeze")## may be added if time permits
+        print("4. deactivate accounts")## will remove an account from the data
+        print("5. Log Out")
+        choice = input("Enter your choice: ")
+        if choice == '1':
+          pass
+        elif choice == '2':
+          pass
+        elif choice == '3':
+          pass
+        elif choice == '4':
+          pass
+        elif choice == '5':
+          print("quiting all")
+          Quit()
     while True:
         print("\nMain Menu:")
         print("1. Check Balance")
@@ -230,7 +267,7 @@ def get_account_details(account_num):
 
     if result:
         # Create an Account object and return it
-        return Account(result[0], result[1], result[2])
+        return Account(result[0], result[1], result[2],result[3],result[4] )
     else:
         return None            
 
