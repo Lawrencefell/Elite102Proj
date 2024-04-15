@@ -139,29 +139,39 @@ def listAll():
     # Close cursor and connection
     cursor.close()
     connection.close()
+def viewAccount(ViewNumb):
+  # Connect to the database
+    connection = mysql.connector.connect(user="LawAdmin", database='elite102data', password="FYuUZamsY8pIr+tMfFGRS5H1rKUbq9i/MT6etRMtSfeqGXIXk0uW9lYV+UQ4boefWqd0wjQu5APXrUFxfCHvzXM65rTv8qtTkpXsO/Vk13rY3k")
+    cursor = connection.cursor()
 
-    
+    # Query to check if the account exists and the PIN matches
+    query = ("SELECT AccountNumb, AccountName, Ballance FROM `elite102data`.`bankdeets` WHERE AccountNumb = %s ")
+    cursor.execute(query, (ViewNumb):
+        print(result.fetchone())
+        # Fetch the first row (if any)
+
+    # Close cursor and connection
+    cursor.close()
+    connection.close()
+def freezeAccount(accountNumb,accountName)
+  # Connect to the database
+    connection = mysql.connector.connect(user="LawAdmin", database='elite102data', password="FYuUZamsY8pIr+tMfFGRS5H1rKUbq9i/MT6etRMtSfeqGXIXk0uW9lYV+UQ4boefWqd0wjQu5APXrUFxfCHvzXM65rTv8qtTkpXsO/Vk13rY3k")
+    cursor = connection.cursor()
+
+    # Query to check if the account exists and the PIN matches
+    query = ("SELECT * FROM `elite102data`.`bankdeets` WHERE AccountNumb = %s AND AccountName = %s")
+    cursor.execute(query, (accountNumb,accountName):
+        result.fetchone()
+        # Fetch the first row (if any)
+            query = ("UPDATE `elite102data`.`bankdeets` SET AccesLevel = 2 WHERE AccountNumb = %s")
+            cursor.execute(query, (amount, account_num))
+            print("Withdrawal of $", amount, "successful.")
+            connection.commit()
+    # Close cursor and connection
+    cursor.close()
+    connection.close()
 def main_menu(user_account):
-    if user_account.AccesLevel == 1:
-      while True:
-        print("\nAdmin Menu:")
-        print("1. list all") ##will not include pins
-        print("2. view account")## will access an individual account
-        print("3. place freeze")## may be added if time permits
-        print("4. deactivate accounts")## will remove an account from the data
-        print("5. Log Out")
-        choice = input("Enter your choice: ")
-        if choice == '1':
-          pass
-        elif choice == '2':
-          pass
-        elif choice == '3':
-          pass
-        elif choice == '4':
-          pass
-        elif choice == '5':
-          print("quiting all")
-          Quit()
+  if user_account.AccesLevel == 0:
     while True:
         print("\nMain Menu:")
         print("1. Check Balance")
@@ -220,6 +230,36 @@ def main_menu(user_account):
             break
         else:
             print("Invalid choice. Please try again.")
+  if user_account.AccesLevel == 1:
+      while True:
+        print("\nAdmin Menu:")
+        print("1. list all") ##will not include pins
+        print("2. view account")## will access an individual account
+        print("3. place freeze")## may be added if time permits
+        print("4. deactivate accounts")## will remove an account from the data
+        print("5. Log Out")
+        choice = input("Enter your choice: ")
+        if choice == '1':
+          listAll()
+          pass
+        elif choice == '2':
+          print("\nwhat acount whould you like to view")
+          ViewNumb = input("Account Number: ")
+          viewAccount(ViewNumb)
+          pass
+        elif choice == '3':
+          print("\nFreeze account")
+          accountNumb = input("Enter Account Number: ")
+          accountName = input("Enter Account Name: ")
+          print(f'are you sure you wish to freeze.\n account Name: {accountName} \n account Number: {accountNumb}')
+          freezeAccount(accountNumb,accountName)
+          pass
+        elif choice == '4':
+          pass
+        elif choice == '5':
+          print("quiting all")
+          Quit()
+    
 def login_or_create():
     while True:    
         choice = input("Do you want to (1) log into an existing account or (2) create a new account? Enter 1 or 2: ")
