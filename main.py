@@ -34,7 +34,7 @@ def create_account(account_num, account_name, pin):
     cursor = connection.cursor()
 
     # Insert new account details into the database
-    query = ("INSERT INTO `elite102data`.`bankdeets` (AccountNumb, AccountName, Ballance, Pin, AccesLevel) VALUES (%s, %s, 0, %s, 0)")
+    query = ("INSERT INTO `elite102data`.`bankdeets` (AccountNumb, AccountName, ballence, Pin, AccesLevel) VALUES (%s, %s, 0, %s, 0)")
     cursor.execute(query, (account_num, account_name, pin))
 
     # Commit changes and close cursor and connection
@@ -61,38 +61,55 @@ def change_pin(account_num, current_pin, new_pin):
     connection = mysql.connector.connect(user="LawAdmin", database='elite102data', password="FYuUZamsY8pIr+tMfFGRS5H1rKUbq9i/MT6etRMtSfeqGXIXk0uW9lYV+UQ4boefWqd0wjQu5APXrUFxfCHvzXM65rTv8qtTkpXsO/Vk13rY3k")
     cursor = connection.cursor()
 
-    # Query to update the PIN
-    query = ("UPDATE `elite102data`.`bankdeets` SET Pin = %s WHERE AccountNumb = %s AND Pin = %s")
-    cursor.execute(query, (new_pin, account_num, current_pin))
+    try:
+        # Check if the current PIN matches the one stored in the database
+        check_query = ("SELECT COUNT(*) FROM `elite102data`.`bankdeets` WHERE AccountNumb = %s AND Pin = %s")
+        cursor.execute(check_query, (account_num, current_pin))
+        result = cursor.fetchone()
+        if result[0] == 0:
+            print("Failed to change PIN. The current PIN is incorrect.")
+            return
 
-    # Check if the PIN was updated successfully
-    if cursor.rowcount > 0:
-        print("PIN changed successfully.")
-        connection.commit()
-    else:
-        print("Failed to change PIN. Make sure the current PIN is correct.")
+        # Update the PIN
+        update_query = ("UPDATE `elite102data`.`bankdeets` SET Pin = %s WHERE AccountNumb = %s")
+        cursor.execute(update_query, (new_pin, account_num))
 
-    # Close cursor and connection
-    cursor.close()
-    connection.close()
+        # Check if the PIN was updated successfully
+        if cursor.rowcount > 0:
+            print("PIN changed successfully.")
+            connection.commit()
+        else:
+            print("Failed to change PIN.")
+    except mysql.connector.Error as err:
+        print(f"Error updating PIN: {err}")
+    finally:
+        # Close cursor and connection
+        cursor.close()
+        connection.close()
 
 def deposit(account_num, amount):
     # Connect to the database
     connection = mysql.connector.connect(user="LawAdmin", database='elite102data', password="FYuUZamsY8pIr+tMfFGRS5H1rKUbq9i/MT6etRMtSfeqGXIXk0uW9lYV+UQ4boefWqd0wjQu5APXrUFxfCHvzXM65rTv8qtTkpXsO/Vk13rY3k")
     cursor = connection.cursor()
 
-    # Query to update the balance
-    query = ("UPDATE `elite102data`.`bankdeets` SET Ballance = Ballance + %s WHERE AccountNumb = %s")
-    cursor.execute(query, (amount, account_num))
+    # Query to check if the PIN matches
+    query = ("SELECT * FROM `elite102data`.`bankdeets` WHERE AccountNumb = %s ")
+    cursor.execute(query, (account_num))
 
-    # Check if the balance was updated successfully
-    if cursor.rowcount > 0:
-        print("Deposit of $", amount, "successful.")
-        connection.commit()
-    else:
-        print("Failed to deposit. Please try again.")
+    # Fetch the first row (if any)
+    result = cursor.fetchone()
 
-    # Close cursor and connection
+    # If PIN matches and the withdrawal amount is valid
+    if result is not None:
+        ballence = result[2]
+        if amount >= 0:
+            # Query to update the balance
+            query = ("UPDATE `elite102data`.`bankdeets` SET ballence = ballence + %s WHERE AccountNumb = %s")
+            cursor.execute(query, (amount, account_num))
+            print("deposit of $", amount, "successful.")
+            connection.commit()
+        else:
+            print("invalid amount.")
     cursor.close()
     connection.close()
 
@@ -113,7 +130,7 @@ def withdraw(account_num, pin, amount):
         balance = result[2]
         if amount <= balance:
             # Query to update the balance
-            query = ("UPDATE `elite102data`.`bankdeets` SET Ballance = Ballance - %s WHERE AccountNumb = %s")
+            query = ("UPDATE `elite102data`.`bankdeets` SET ballence = ballence - %s WHERE AccountNumb = %s")
             cursor.execute(query, (amount, account_num))
             print("Withdrawal of $", amount, "successful.")
             connection.commit()
@@ -131,10 +148,16 @@ def listAll():
     cursor = connection.cursor()
 
     # Query to check if the account exists and the PIN matches
-    query = ("SELECT AccountNumb, AccountName, Ballance FROM `elite102data`.`bankdeets` ")
-    for result in cursor.execute(query, multi=True):
-        print(result.fetchall())
-        # Fetch the first row (if any)
+    query = ("SELECT AccountNumb, AccountName, ballence FROM `elite102data`.`bankdeets` ")
+    cursor.execute(query, multi=True)
+
+    # Fetch the first row (if any)
+    result = cursor.fetchall()
+
+    # Check if result is not None before iterating
+    if result:
+        for row in result:
+            print(row)
 
     # Close cursor and connection
     cursor.close()
@@ -144,29 +167,41 @@ def viewAccount(ViewNumb):
     connection = mysql.connector.connect(user="LawAdmin", database='elite102data', password="FYuUZamsY8pIr+tMfFGRS5H1rKUbq9i/MT6etRMtSfeqGXIXk0uW9lYV+UQ4boefWqd0wjQu5APXrUFxfCHvzXM65rTv8qtTkpXsO/Vk13rY3k")
     cursor = connection.cursor()
 
-    # Query to check if the account exists and the PIN matches
-    query = ("SELECT AccountNumb, AccountName, Ballance FROM `elite102data`.`bankdeets` WHERE AccountNumb = %s ")
-    cursor.execute(query, (ViewNumb):
-        print(result.fetchone())
+    try:
+        # Query to check if the account exists and the PIN matches
+        query = ("SELECT AccountNumb, AccountName, ballence FROM `elite102data`.`bankdeets` WHERE AccountNumb = %s")
+        cursor.execute(query, (ViewNumb,))
+        
         # Fetch the first row (if any)
-
+        result = cursor.fetchone()
+        
+        if result:
+            print("Account Number:", result[0])
+            print("Account Name:", result[1])
+            print("Balance:", result[2])
+        else:
+            print("Account not found.")
+    finally:
+        # Close cursor and connection
+        cursor.close()
+        connection.close()
     # Close cursor and connection
     cursor.close()
     connection.close()
-def freezeAccount(accountNumb,accountName)
+def freezeAccount(accountNumb,accountName):
   # Connect to the database
     connection = mysql.connector.connect(user="LawAdmin", database='elite102data', password="FYuUZamsY8pIr+tMfFGRS5H1rKUbq9i/MT6etRMtSfeqGXIXk0uW9lYV+UQ4boefWqd0wjQu5APXrUFxfCHvzXM65rTv8qtTkpXsO/Vk13rY3k")
     cursor = connection.cursor()
 
     # Query to check if the account exists and the PIN matches
     query = ("SELECT * FROM `elite102data`.`bankdeets` WHERE AccountNumb = %s AND AccountName = %s")
-    cursor.execute(query, (accountNumb,accountName):
-        result.fetchone()
+    cursor.execute(query, (accountNumb,accountName))
+    result = cursor.fetchone()
         # Fetch the first row (if any)
-            query = ("UPDATE `elite102data`.`bankdeets` SET AccesLevel = 2 WHERE AccountNumb = %s")
-            cursor.execute(query, (amount, account_num))
-            print("Withdrawal of $", amount, "successful.")
-            connection.commit()
+    query = ("UPDATE `elite102data`.`bankdeets` SET AccesLevel = 2 WHERE AccountNumb = %s")
+    cursor.execute(query, (accountName, accountNumb))
+    print("freeze of ", accountName, "successful.")
+    connection.commit()
     # Close cursor and connection
     cursor.close()
     connection.close()
@@ -258,7 +293,7 @@ def main_menu(user_account):
           pass
         elif choice == '5':
           print("quiting all")
-          Quit()
+          quit()
     
 def login_or_create():
     while True:    
@@ -311,5 +346,10 @@ def get_account_details(account_num):
     else:
         return None            
 
-# Example usage:
-login_or_create()
+# Encapsulate main code in a function
+def main():
+    login_or_create()
+
+# Call main function if script is executed directly
+if __name__ == "__main__":
+    main()
