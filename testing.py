@@ -44,7 +44,6 @@ class TestWithdraw(unittest.TestCase):
     def test_withdraw_invalid_pin(self, mock_input):
         withdraw('1001', '0000', 2000)
         # Add assertions here to verify that the withdrawal failed due to invalid PIN
-
 class TestDeposit(unittest.TestCase):
 
     @patch('builtins.input', side_effect=['1001', '2000'])
@@ -56,7 +55,6 @@ class TestDeposit(unittest.TestCase):
     def test_deposit_invalid_amount(self, mock_input):
         deposit('1001', -500)  # Incorrect parameter count and type
         # Add assertions here to verify that the deposit failed due to invalid amount
-
 class TestChangePin(unittest.TestCase):
 
     @patch('builtins.input', side_effect=['1001', '4321', '4321'])
@@ -68,7 +66,6 @@ class TestChangePin(unittest.TestCase):
     def test_change_pin_invalid_current_pin(self, mock_input):
         change_pin('1001', '0000', '1111')
         # Add assertions here to verify that the PIN change failed due to invalid current PIN
-
 class TestViewAccount(unittest.TestCase):
 
     @patch('builtins.input', return_value='1001')
@@ -80,6 +77,97 @@ class TestViewAccount(unittest.TestCase):
     def test_view_account_nonexistent(self, mock_input):
         viewAccount('9999')
         # Add assertions here to verify that the function handles a nonexistent account correctly
+class TestLogin(unittest.TestCase):
+
+    @patch('builtins.input', side_effect=['1001', '4321'])
+    def test_login_successful(self, mock_input):
+        self.assertTrue(LogIn('1001', '4321'))
+        # Add assertions here to verify that the login was successful
+
+    @patch('builtins.input', side_effect=['1001', '0000'])
+    def test_login_invalid_pin(self, mock_input):
+        self.assertFalse(LogIn('1001', '0000'))
+        # Add assertions here to verify that the login failed due to invalid PIN
+
+    # Add more test cases for different scenarios
+class TestCreateAccount(unittest.TestCase):
+
+    @patch('builtins.input', side_effect=['1061', 'John dear', '9631'])
+    def test_create_account_successful(self, mock_input):
+        create_account('1061', 'John dear', '9631')
+        # Add assertions here to verify that the account was created successfully
+
+    # Add more test cases for different scenarios
+
+
+class TestIsValidPin(unittest.TestCase):
+
+    def test_valid_pin(self):
+        self.assertTrue(is_valid_pin('4321'))
+        # Add assertions here to verify that a valid PIN is recognized
+
+    def test_invalid_pin_length(self):
+        self.assertFalse(is_valid_pin('123'))
+        # Add assertions here to verify that an invalid PIN with incorrect length is detected
+
+    # Add more test cases for different scenarios
+
+
+class TestFreezeAccount(unittest.TestCase):
+
+    @patch('builtins.input', side_effect=['1002', 'Jane Smith'])
+    def test_freeze_account_successful(self, mock_input):
+        freezeAccount('1002', 'Jane Smith')
+        # Add assertions here to verify that the account was frozen successfully
+
+    # Add more test cases for different scenarios
+
+
+class TestMainMenu(unittest.TestCase):
+
+    def test_main_menu_user(self):
+        # Test main menu for a regular user
+        pass
+        # Add assertions here to verify the behavior of the main menu for a regular user
+
+    def test_main_menu_admin(self):
+        # Test main menu for an admin
+        pass
+        # Add assertions here to verify the behavior of the main menu for an admin
+
+    # Add more test cases for different scenarios
+
+
+class TestLoginOrCreate(unittest.TestCase):
+
+    @patch('builtins.input', return_value='1')
+    def test_login_option_selected(self, mock_input):
+        # Test when the user selects the login option
+        pass
+        # Add assertions here to verify the behavior when the user selects the login option
+
+    @patch('builtins.input', return_value='2')
+    def test_create_account_option_selected(self, mock_input):
+        # Test when the user selects the create account option
+        pass
+        # Add assertions here to verify the behavior when the user selects the create account option
+
+    # Add more test cases for different scenarios
+
+
+class TestGetAccountDetails(unittest.TestCase):
+
+    def test_existing_account_details(self):
+        # Test when fetching details of an existing account
+        pass
+        # Add assertions here to verify the fetched details of an existing account
+
+    def test_nonexistent_account_details(self):
+        # Test when fetching details of a nonexistent account
+        pass
+        # Add assertions here to verify the behavior when fetching details of a nonexistent account
+
+    # Add more test cases for different scenarios
 
 if __name__ == '__main__':
     unittest.main()

@@ -94,7 +94,7 @@ def deposit(account_num, amount):
 
     # Query to check if the PIN matches
     query = ("SELECT * FROM `elite102data`.`bankdeets` WHERE AccountNumb = %s ")
-    cursor.execute(query, (account_num))
+    cursor.execute(query, (account_num,))
 
     # Fetch the first row (if any)
     result = cursor.fetchone()
@@ -198,8 +198,8 @@ def freezeAccount(accountNumb,accountName):
     cursor.execute(query, (accountNumb,accountName))
     result = cursor.fetchone()
         # Fetch the first row (if any)
-    query = ("UPDATE `elite102data`.`bankdeets` SET AccesLevel = 2 WHERE AccountNumb = %s")
-    cursor.execute(query, (accountName, accountNumb))
+    query = ("UPDATE `elite102data`.`bankdeets` SET AccesLevel = 2 WHERE AccountNumb = %s AND AccountName = %s")
+    cursor.execute(query, (accountNumb,  accountName))
     print("freeze of ", accountName, "successful.")
     connection.commit()
     # Close cursor and connection
